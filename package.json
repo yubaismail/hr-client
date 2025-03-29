@@ -12,13 +12,16 @@
     "@faker-js/faker": "^9.6.0",
     "@types/papaparse": "^5.3.15",
     "axios": "^1.8.4",
+    "firebase": "^11.5.0",
     "lucide-react": "^0.484.0",
     "next": "^14.2.25",
     "next-auth": "^4.24.11",
     "papaparse": "^5.5.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-icons": "^5.5.0"
+    "react-firebase-hooks": "^5.1.1",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.4.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.15",
