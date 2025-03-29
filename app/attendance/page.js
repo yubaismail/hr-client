@@ -133,24 +133,24 @@ const Attendance = () => {
   const isFuture = dateCategory === "Future";
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Employee Attendance</h1>
+    <div className="p-3 md:p-6 bg-gray-100 min-h-screen">
+      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-3 md:p-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Employee Attendance</h1>
         
-        <div className="flex flex-wrap gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4 mb-4 md:mb-6">
           <div className="flex items-center">
-            <label htmlFor="date-selector" className="mr-2 text-gray-700">Date:</label>
+            <label htmlFor="date-selector" className="mr-2 text-gray-700 w-16 sm:w-auto">Date:</label>
             <input
               id="date-selector"
               type="date"
               value={selectedDate}
               onChange={handleDateChange}
-              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="border p-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none flex-grow"
             />
           </div>
           
           <div className="flex items-center">
-            <label htmlFor="status-filter" className="mr-2 text-gray-700">Status:</label>
+            <label htmlFor="status-filter" className="mr-2 text-gray-700 w-16 sm:w-auto">Status:</label>
             <select
               id="status-filter"
               value={filter}
@@ -165,8 +165,8 @@ const Attendance = () => {
           </div>
         </div>
         
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-700">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
+          <h2 className="text-lg md:text-xl font-semibold text-gray-700">
             Attendance for {new Date(selectedDate).toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -185,22 +185,22 @@ const Attendance = () => {
         
         {/* Stats summary */}
         {stats && (
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="text-sm text-blue-700">Total</div>
-              <div className="text-2xl font-bold">{stats.total}</div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-6">
+            <div className="bg-blue-50 p-3 md:p-4 rounded-lg">
+              <div className="text-xs md:text-sm text-blue-700">Total</div>
+              <div className="text-xl md:text-2xl font-bold">{stats.total}</div>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <div className="text-sm text-green-700">Present</div>
-              <div className="text-2xl font-bold">{stats.present} ({stats.presentPercentage}%)</div>
+            <div className="bg-green-50 p-3 md:p-4 rounded-lg">
+              <div className="text-xs md:text-sm text-green-700">Present</div>
+              <div className="text-xl md:text-2xl font-bold">{stats.present} ({stats.presentPercentage}%)</div>
             </div>
-            <div className="bg-red-50 p-4 rounded-lg">
-              <div className="text-sm text-red-700">Absent</div>
-              <div className="text-2xl font-bold">{stats.absent} ({stats.absentPercentage}%)</div>
+            <div className="bg-red-50 p-3 md:p-4 rounded-lg">
+              <div className="text-xs md:text-sm text-red-700">Absent</div>
+              <div className="text-xl md:text-2xl font-bold">{stats.absent} ({stats.absentPercentage}%)</div>
             </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <div className="text-sm text-yellow-700">Pending</div>
-              <div className="text-2xl font-bold">{stats.pending} ({stats.pendingPercentage}%)</div>
+            <div className="bg-yellow-50 p-3 md:p-4 rounded-lg">
+              <div className="text-xs md:text-sm text-yellow-700">Pending</div>
+              <div className="text-xl md:text-2xl font-bold">{stats.pending} ({stats.pendingPercentage}%)</div>
             </div>
           </div>
         )}
@@ -211,7 +211,8 @@ const Attendance = () => {
           </div>
         ) : (
           <>
-            <div className="bg-gray-50 rounded-md p-3 mb-4 flex justify-between text-sm font-medium text-gray-500">
+            {/* Header row - visible on tablet and larger screens */}
+            <div className="hidden sm:flex bg-gray-50 rounded-md p-3 mb-4 text-sm font-medium text-gray-500">
               <span className="w-1/4">Employee Name</span>
               <span className="w-1/4 text-center">Department</span>
               <span className="w-1/4 text-center">Status</span>
@@ -223,14 +224,40 @@ const Attendance = () => {
                 {filteredAttendance.map((employee) => (
                   <li 
                     key={employee.id} 
-                    className="flex items-center justify-between p-3 bg-white border rounded-md hover:bg-gray-50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white border rounded-md hover:bg-gray-50 transition-colors gap-2 sm:gap-0"
                   >
-                    <div className="w-1/4">
+                    {/* Mobile view includes labels */}
+                    <div className="sm:w-1/4">
                       <div className="font-medium text-gray-800">{employee.name}</div>
                       <div className="text-xs text-gray-500">{employee.employeeId}</div>
                     </div>
-                    <span className="w-1/4 text-center text-gray-600">{employee.department}</span>
-                    <span className={`w-1/4 text-center px-2 py-1 rounded-full text-xs font-medium ${
+                    
+                    <div className="flex justify-between sm:hidden border-b pb-2 mb-2">
+                      <span className="text-xs font-medium text-gray-500">Department:</span>
+                      <span className="text-gray-600">{employee.department}</span>
+                    </div>
+                    
+                    {/* Desktop view for department */}
+                    <span className="hidden sm:block sm:w-1/4 text-center text-gray-600">{employee.department}</span>
+                    
+                    <div className="flex justify-between items-center sm:hidden border-b pb-2 mb-2">
+                      <span className="text-xs font-medium text-gray-500">Status:</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        employee.status === "Present" ? "bg-green-100 text-green-800" : 
+                        employee.status === "Absent" ? "bg-red-100 text-red-800" : 
+                        "bg-yellow-100 text-yellow-800"
+                      }`}>
+                        {employee.status}
+                        {employee.recordedAt && (
+                          <span className="block text-xs mt-1">
+                            {new Date(employee.recordedAt).toLocaleTimeString()}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    
+                    {/* Desktop view for status */}
+                    <span className={`hidden sm:block sm:w-1/4 text-center px-2 py-1 rounded-full text-xs font-medium ${
                       employee.status === "Present" ? "bg-green-100 text-green-800" : 
                       employee.status === "Absent" ? "bg-red-100 text-red-800" : 
                       "bg-yellow-100 text-yellow-800"
@@ -244,30 +271,62 @@ const Attendance = () => {
                     </span>
                     
                     {isToday && (
-                      <div className="w-1/4 text-right space-x-2">
-                        <button
-                          onClick={() => updateAttendanceStatus(employee.id, "Present")}
-                          disabled={employee.status === "Present"}
-                          className={`px-2 py-1 text-xs rounded ${
-                            employee.status === "Present" 
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                              : "bg-green-500 text-white hover:bg-green-600"
-                          }`}
-                        >
-                          Present
-                        </button>
-                        <button
-                          onClick={() => updateAttendanceStatus(employee.id, "Absent")}
-                          disabled={employee.status === "Absent"}
-                          className={`px-2 py-1 text-xs rounded ${
-                            employee.status === "Absent" 
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
-                              : "bg-red-500 text-white hover:bg-red-600"
-                          }`}
-                        >
-                          Absent
-                        </button>
-                      </div>
+                      <>
+                        {/* Mobile view for actions */}
+                        <div className="sm:hidden flex justify-between items-center">
+                          <span className="text-xs font-medium text-gray-500">Actions:</span>
+                          <div className="space-x-2">
+                            <button
+                              onClick={() => updateAttendanceStatus(employee.id, "Present")}
+                              disabled={employee.status === "Present"}
+                              className={`px-2 py-1 text-xs rounded ${
+                                employee.status === "Present" 
+                                  ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                  : "bg-green-500 text-white hover:bg-green-600"
+                              }`}
+                            >
+                              Present
+                            </button>
+                            <button
+                              onClick={() => updateAttendanceStatus(employee.id, "Absent")}
+                              disabled={employee.status === "Absent"}
+                              className={`px-2 py-1 text-xs rounded ${
+                                employee.status === "Absent" 
+                                  ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                  : "bg-red-500 text-white hover:bg-red-600"
+                              }`}
+                            >
+                              Absent
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {/* Desktop view for actions */}
+                        <div className="hidden sm:block sm:w-1/4 text-right space-x-2">
+                          <button
+                            onClick={() => updateAttendanceStatus(employee.id, "Present")}
+                            disabled={employee.status === "Present"}
+                            className={`px-2 py-1 text-xs rounded ${
+                              employee.status === "Present" 
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                : "bg-green-500 text-white hover:bg-green-600"
+                            }`}
+                          >
+                            Present
+                          </button>
+                          <button
+                            onClick={() => updateAttendanceStatus(employee.id, "Absent")}
+                            disabled={employee.status === "Absent"}
+                            className={`px-2 py-1 text-xs rounded ${
+                              employee.status === "Absent" 
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed" 
+                                : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
+                          >
+                            Absent
+                          </button>
+                        </div>
+                      </>
                     )}
                   </li>
                 ))}
@@ -278,8 +337,8 @@ const Attendance = () => {
               </div>
             )}
             
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg text-sm">
-              <div className="flex justify-between mb-2">
+            <div className="mt-4 md:mt-6 p-3 md:p-4 bg-gray-50 rounded-lg text-xs md:text-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mb-2">
                 <span className="text-gray-600">Showing {filteredAttendance.length} of {attendance.length} employees</span>
                 {isPast && (
                   <span className="text-blue-600">

@@ -12,6 +12,8 @@ const Payroll = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [editingId, setEditingId] = useState(null);
+  const [isDetailView, setIsDetailView] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   // Extended departments
   const departments = [
@@ -112,6 +114,10 @@ const Payroll = () => {
   // Handle deleting employee from payroll
   const handleDeleteEmployee = (id) => {
     setPayrollList(payrollList.filter((employee) => employee.id !== id));
+    if (selectedEmployee && selectedEmployee.id === id) {
+      setIsDetailView(false);
+      setSelectedEmployee(null);
+    }
   };
 
   // Handle editing employee details
@@ -120,6 +126,7 @@ const Payroll = () => {
     setEmployeeName(employee.name);
     setSalary(employee.salary);
     setDepartment(employee.department);
+    setIsDetailView(false);
   };
 
   // Handle saving edited employee details
@@ -140,6 +147,12 @@ const Payroll = () => {
     setEmployeeName("");
     setSalary("");
     setDepartment("Engineering");
+  };
+
+  // View employee details (for mobile)
+  const handleViewEmployee = (employee) => {
+    setSelectedEmployee(employee);
+    setIsDetailView(true);
   };
 
   // Filter employees based on search term
@@ -166,15 +179,21 @@ const Payroll = () => {
     0
   );
 
+  // Back to list from detail view
+  const handleBackToList = () => {
+    setIsDetailView(false);
+    setSelectedEmployee(null);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-3xl font-bold text-center mb-6 text-blue-700">
+    <div className="max-w-4xl mx-auto p-3 sm:p-6 bg-white rounded-lg shadow-lg">
+      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-blue-700">
         Payroll Management
       </h1>
 
-      <div className="bg-blue-50 p-4 rounded-lg mb-6">
-        <div className="flex flex-wrap gap-4 mb-4">
-          <div className="flex-1">
+      <div className="bg-blue-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-4">
+          <div className="w-full sm:flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Employee Name
             </label>
@@ -186,7 +205,7 @@ const Payroll = () => {
             />
           </div>
 
-          <div className="flex-1">
+          <div className="w-full sm:flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Salary Amount
             </label>
@@ -199,7 +218,7 @@ const Payroll = () => {
             />
           </div>
 
-          <div className="flex-1">
+          <div className="w-full sm:flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Department
             </label>
@@ -221,14 +240,14 @@ const Payroll = () => {
           {editingId ? (
             <Button
               onClick={handleSaveEdit}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
             >
               Save Changes
             </Button>
           ) : (
             <Button
               onClick={handleAddPayroll}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
             >
               Add Employee
             </Button>
@@ -236,107 +255,100 @@ const Payroll = () => {
         </div>
       </div>
 
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex-1 mr-4">
-            <Input
-              placeholder="Search by name or department..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-            />
-          </div>
-          <div className="flex items-center">
-            <label className="mr-2 text-sm font-medium text-gray-700">
-              Sort by:
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="p-2 border border-gray-300 rounded-md"
-            >
-              <option value="name">Name</option>
-              <option value="salary">Salary</option>
-              <option value="department">Department</option>
-            </select>
-          </div>
+      {/* Search and Sort Section */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="w-full sm:w-1/3">
+          <Input
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search Employees"
+            className="w-full"
+          />
         </div>
 
-        <div className="bg-gray-50 rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Salary
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {sortedEmployees.length > 0 ? (
-                  sortedEmployees.map((employee) => (
-                    <tr key={employee.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {employee.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {employee.department}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${parseInt(employee.salary).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEditEmployee(employee)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-3"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEmployee(employee.id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan="4"
-                      className="px-6 py-4 text-center text-sm text-gray-500"
-                    >
-                      No employees found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="w-full sm:w-1/3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Sort By
+          </label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md"
+          >
+            <option value="name">Name</option>
+            <option value="salary">Salary</option>
+            <option value="department">Department</option>
+          </select>
         </div>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="flex justify-between items-center">
-          <div className="text-lg font-medium">Summary</div>
-          <div className="text-xl font-bold">
-            Total Payroll: ${totalPayroll.toLocaleString()}
-          </div>
-        </div>
-        <div className="mt-2 text-sm text-gray-600">
-          Total Employees: {payrollList.length}
-        </div>
+      {/* Payroll Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full table-auto border-collapse border border-gray-300 text-sm">
+          <thead>
+            <tr>
+              <th className="p-2 text-left border border-gray-300">Name</th>
+              <th className="p-2 text-left border border-gray-300">Salary</th>
+              <th className="p-2 text-left border border-gray-300">Department</th>
+              <th className="p-2 text-left border border-gray-300">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedEmployees.map((employee) => (
+              <tr key={employee.id}>
+                <td className="p-2 border border-gray-300">{employee.name}</td>
+                <td className="p-2 border border-gray-300">${employee.salary}</td>
+                <td className="p-2 border border-gray-300">{employee.department}</td>
+                <td className="p-2 border border-gray-300">
+                  <Button
+                    onClick={() => handleViewEmployee(employee)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-3 mr-2"
+                  >
+                    View
+                  </Button>
+                  <Button
+                    onClick={() => handleEditEmployee(employee)}
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs py-1 px-3 mr-2"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    onClick={() => handleDeleteEmployee(employee.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-3"
+                  >
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      <div className="mt-4 text-lg font-bold text-right">
+        Total Payroll: ${totalPayroll.toLocaleString()}
+      </div>
+
+      {/* Employee Details View */}
+      {isDetailView && selectedEmployee && (
+        <div className="mt-6 p-4 border border-gray-300 bg-blue-100 rounded-md">
+          <h3 className="text-xl font-semibold mb-3">
+            Employee Details: {selectedEmployee.name}
+          </h3>
+          <div>
+            <strong>Salary:</strong> ${selectedEmployee.salary}
+          </div>
+          <div>
+            <strong>Department:</strong> {selectedEmployee.department}
+          </div>
+          <Button
+            onClick={handleBackToList}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Back to List
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
