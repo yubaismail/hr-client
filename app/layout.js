@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation"; // Import usePathname
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
@@ -12,6 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }) {
   const router = useRouter();
+  const pathname = usePathname(); // Get current page path
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -53,12 +54,14 @@ export default function RootLayout({ children }) {
               </ul>
             </nav>
 
-            {/* Logout Button */}
-            <div className="flex justify-center md:justify-end p-4">
-              <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
+            {/* Logout Button - Hide on Login Page */}
+            {pathname !== "/login" && (
+              <div className="flex justify-center md:justify-end p-4">
+                <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg" onClick={handleLogout}>
+                  Logout
+                </button>
+              </div>
+            )}
           </header>
 
           {/* Page Content */}
