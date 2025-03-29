@@ -1,0 +1,29 @@
+{
+  "name": "hr-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.6.0",
+    "@types/papaparse": "^5.3.15",
+    "axios": "^1.8.4",
+    "lucide-react": "^0.484.0",
+    "next": "^14.2.25",
+    "next-auth": "^4.24.11",
+    "papaparse": "^5.5.2",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.15",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
+  }
+}
