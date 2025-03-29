@@ -48,15 +48,6 @@ export default function Home() {
             </button>
           </Link>
           <button
-            onClick={() => {
-              localStorage.removeItem("isAuthenticated");
-              router.push("/login");
-            }}
-            className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg shadow transition-all"
-          >
-            Logout
-          </button>
-          <button
             onClick={() => setShowTutorial(true)}
             className="w-full md:w-auto bg-white hover:bg-gray-100 text-blue-600 font-medium py-2 px-6 rounded-lg border border-blue-300 transition-all"
           >

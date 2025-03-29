@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,9 +21,13 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (email === dummyUser.email && password === dummyUser.password) {
-      // ✅ Store login status in localStorage
-      localStorage.setItem("isAuthenticated", "true");
-      router.push("/"); // Redirect to home page
+      // Set authentication cookie instead of localStorage
+      // In a real app, you would set a JWT token here
+      Cookies.set('auth', 'true', { expires: 1 }); // Expires in 1 day
+      
+      // Redirect to home page
+      router.push("/");
+      router.refresh(); // Force a refresh to apply the new auth state
     } else {
       setError("Invalid email or password!");
     }
