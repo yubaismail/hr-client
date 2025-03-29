@@ -297,7 +297,7 @@ const Payroll = () => {
             {sortedEmployees.map((employee) => (
               <tr key={employee.id}>
                 <td className="p-2 border border-gray-300">{employee.name}</td>
-                <td className="p-2 border border-gray-300">${employee.salary}</td>
+                <td className="p-2 border border-gray-300">KES {employee.salary}</td>
                 <td className="p-2 border border-gray-300">{employee.department}</td>
                 <td className="p-2 border border-gray-300">
                   <Button

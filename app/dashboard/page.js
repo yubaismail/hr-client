@@ -1,6 +1,6 @@
 "use client";
 
-import { FaUserTie, FaCalendarCheck, FaMoneyBillWave, FaPlus } from "react-icons/fa";
+import { FaUserTie, FaCalendarCheck, FaMoneyBillWave } from "react-icons/fa";
 
 export default function Dashboard() {
   return (
@@ -12,18 +12,6 @@ export default function Dashboard() {
           Manage your employees, attendance, and payroll efficiently.
         </p>
       </header>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <button className="flex items-center justify-center gap-2 bg-blue-500 text-white p-4 rounded-lg hover:bg-blue-600 transition-colors">
-          <FaPlus />
-          <span>Add Employee</span>
-        </button>
-        <button className="flex items-center justify-center gap-2 bg-green-500 text-white p-4 rounded-lg hover:bg-green-600 transition-colors">
-          <FaMoneyBillWave />
-          <span>Manage Payroll</span>
-        </button>
-      </div>
 
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
