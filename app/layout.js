@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation"; // Import usePathname
+import { useRouter, usePathname } from "next/navigation";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }) {
   const router = useRouter();
-  const pathname = usePathname(); // Get current page path
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -46,11 +46,12 @@ export default function RootLayout({ children }) {
             {/* Navigation */}
             <nav className={`md:flex justify-center md:items-center text-lg transition-all duration-300 ${menuOpen ? "block" : "hidden md:block"}`}>
               <ul className="flex flex-col md:flex-row md:space-x-6 text-center md:text-left">
-                <li><Link href="/" className="block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent">Home</Link></li>
-                <li><Link href="/dashboard" className="block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent">Dashboard</Link></li>
-                <li><Link href="/employees" className="block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent">Employees</Link></li>
-                <li><Link href="/attendance" className="block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent">Attendance</Link></li>
-                <li><Link href="/payroll" className="block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent">Payroll</Link></li>
+                <li><Link href="/" className={`block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent ${pathname === "/" ? "font-bold underline" : ""}`}>Home</Link></li>
+                <li><Link href="/dashboard" className={`block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent ${pathname === "/dashboard" ? "font-bold underline" : ""}`}>Dashboard</Link></li>
+                <li><Link href="/employees" className={`block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent ${pathname === "/employees" ? "font-bold underline" : ""}`}>Employees</Link></li>
+                <li><Link href="/attendance" className={`block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent ${pathname === "/attendance" ? "font-bold underline" : ""}`}>Attendance</Link></li>
+                <li><Link href="/payroll" className={`block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent ${pathname === "/payroll" ? "font-bold underline" : ""}`}>Payroll</Link></li>
+                <li><Link href="/performance-reviews" className={`block py-3 px-6 hover:bg-blue-500 md:hover:bg-transparent ${pathname === "/performance-reviews" ? "font-bold underline" : ""}`}>Performance Reviews</Link></li>
               </ul>
             </nav>
 

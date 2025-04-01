@@ -29,7 +29,7 @@ export default function Home() {
     { title: "Employee Management", description: "Add, edit, and manage employee profiles", icon: "👥", link: "/employees", stats: "143 employees" },
     { title: "Attendance Tracking", description: "Monitor employee attendance & leaves", icon: "📊", link: "/attendance", stats: "98% on time" },
     { title: "Payroll Processing", description: "Automate salary calculations & payslips", icon: "💰", link: "/payroll", stats: "Next: Apr 30" },
-    { title: "Performance Review", description: "Track employee growth & appraisals", icon: "📈", link: "/performance", stats: "12 pending reviews" },
+    { title: "Performance Review", description: "Track employee growth & appraisals", icon: "📈", link: "/performance-reviews", stats: "12 pending reviews" },
   ];
 
   return (

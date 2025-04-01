@@ -7,6 +7,19 @@ import { Search, PlusCircle, Filter } from "lucide-react";
 import { loadEmployeeData } from "@/lib/dataUtils";
 
 export default function EmployeesPage() {
+  // List of realistic names for employees
+  const firstNames = ["Michael", "Sarah", "David", "Emma", "John", "Olivia", "James", "Sophia", "Robert", "Ava", 
+                      "William", "Isabella", "Daniel", "Mia", "Richard", "Charlotte", "Thomas", "Amelia", "Matthew", 
+                      "Harper", "Alexandra", "Benjamin", "Natalie", "Christopher", "Elizabeth", "Andrew", "Grace", 
+                      "Joshua", "Lily", "Ryan", "Victoria", "Brandon", "Sofia", "Jacob", "Chloe", "Kevin", "Luna", 
+                      "Justin", "Zoe", "Brian", "Hannah", "Jason", "Stella", "Tyler", "Scarlett"];
+                      
+  const lastNames = ["Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
+                    "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", 
+                    "Robinson", "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "King", 
+                    "Wright", "Scott", "Green", "Baker", "Adams", "Nelson", "Hill", "Ramirez", "Campbell", "Mitchell", 
+                    "Roberts", "Carter", "Phillips", "Evans", "Turner", "Torres"];
+
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
@@ -16,10 +29,60 @@ export default function EmployeesPage() {
   useEffect(() => {
     async function fetchData() {
       const data = await loadEmployeeData();
-      setEmployees(data);
+      // Assign realistic names to all employees
+      const processedEmployees = data.map((emp, index) => {
+        // Generate a unique realistic name for each employee
+        const randomFirstNameIndex = index % firstNames.length;
+        const randomLastNameIndex = (index * 3) % lastNames.length; // Use different multiplication to avoid patterns
+        
+        const randomFirstName = firstNames[randomFirstNameIndex];
+        const randomLastName = lastNames[randomLastNameIndex];
+        
+        return {
+          ...emp,
+          first_name: randomFirstName,
+          last_name: randomLastName,
+          name: `${randomFirstName} ${randomLastName}`,
+          position: emp.position || generateRandomPosition(emp.department || "General"),
+          hire_date: emp.hire_date || generateRandomHireDate(),
+          email: `${randomFirstName.toLowerCase()}.${randomLastName.toLowerCase()}@company.com`
+        };
+      });
+      setEmployees(processedEmployees);
     }
     fetchData();
   }, []);
+
+  // Generate random position titles based on department
+  const generateRandomPosition = (department) => {
+    const positions = {
+      "Engineering": ["Software Engineer", "Frontend Developer", "Backend Developer", "DevOps Engineer", "QA Engineer", "Engineering Manager"],
+      "Marketing": ["Marketing Specialist", "Content Strategist", "SEO Specialist", "Social Media Manager", "Marketing Director"],
+      "Sales": ["Sales Representative", "Account Executive", "Sales Manager", "Business Development Manager"],
+      "HR": ["HR Specialist", "Recruiter", "HR Manager", "Talent Acquisition Specialist"],
+      "Finance": ["Financial Analyst", "Accountant", "Finance Manager", "Controller"],
+      "Product": ["Product Manager", "Product Owner", "UX Designer", "UI Designer", "Product Director"],
+      "Customer Support": ["Support Specialist", "Customer Success Manager", "Technical Support Engineer"],
+      "General": ["Analyst", "Specialist", "Coordinator", "Manager", "Director"]
+    };
+    
+    const deptPositions = positions[department] || positions["General"];
+    return deptPositions[Math.floor(Math.random() * deptPositions.length)];
+  };
+
+  // Generate random hire date (between 1 and 10 years ago)
+  const generateRandomHireDate = () => {
+    const today = new Date();
+    const years = Math.floor(Math.random() * 9) + 1; // 1-10 years
+    const pastDate = new Date(today);
+    pastDate.setFullYear(today.getFullYear() - years);
+    
+    // Randomize month and day
+    pastDate.setMonth(Math.floor(Math.random() * 12));
+    pastDate.setDate(Math.floor(Math.random() * 28) + 1);
+    
+    return pastDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
 
   // Function to delete an employee
   const handleDeleteEmployee = (id) => {
@@ -28,9 +91,20 @@ export default function EmployeesPage() {
 
   // Function to add a new employee
   const handleAddEmployee = (newEmployee) => {
+    // Generate a random name for the new employee
+    const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const randomLastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+    
     setEmployees((prevEmployees) => [
       ...prevEmployees,
-      { id: Date.now(), ...newEmployee }
+      { 
+        id: Date.now(),
+        first_name: randomFirstName,
+        last_name: randomLastName,
+        name: `${randomFirstName} ${randomLastName}`,
+        email: `${randomFirstName.toLowerCase()}.${randomLastName.toLowerCase()}@company.com`,
+        ...newEmployee 
+      }
     ]);
     setShowAddModal(false);
   };
