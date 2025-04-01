@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from 'js-cookie';
+import { FaEye, FaEyeSlash, FaLock, FaEnvelope, FaUser, FaBuilding, FaBriefcase, FaPhone, FaCheck } from "react-icons/fa";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function LoginPage() {
     password: "AlignHR12345@",
   };
   
+  // State management
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,27 +23,42 @@ export default function LoginPage() {
   const [isResetMode, setIsResetMode] = useState(false);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   
   // Enhanced registration form state
-  const [regEmail, setRegEmail] = useState("");
-  const [regPassword, setRegPassword] = useState("");
-  const [regConfirmPassword, setRegConfirmPassword] = useState("");
-  const [regName, setRegName] = useState("");
-  const [regCompany, setRegCompany] = useState("");
-  const [regRole, setRegRole] = useState("");
-  const [regPhone, setRegPhone] = useState("");
-  const [regTerms, setRegTerms] = useState(false);
-  const [regMarketing, setRegMarketing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    role: "HR Manager",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    terms: false,
+    marketing: false
+  });
   
   // Password strength validation
-  const [passwordStrength, setPasswordStrength] = useState(0);
-  const [passwordFeedback, setPasswordFeedback] = useState("");
-  
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    feedback: []
+  });
+
+  // Available roles for dropdown
+  const roles = [
+    "HR Manager",
+    "HR Director",
+    "HR Specialist",
+    "Recruiter",
+    "Payroll Administrator",
+    "CEO/Founder",
+    "Other"
+  ];
+
   // Validate password strength
   useEffect(() => {
-    if (!regPassword) {
-      setPasswordStrength(0);
-      setPasswordFeedback("");
+    if (!formData.password) {
+      setPasswordStrength({ score: 0, feedback: [] });
       return;
     }
     
@@ -49,32 +66,31 @@ export default function LoginPage() {
     let feedback = [];
     
     // Length check
-    if (regPassword.length >= 8) {
+    if (formData.password.length >= 8) {
       strength += 1;
     } else {
       feedback.push("Use at least 8 characters");
     }
     
     // Character variety checks
-    if (/[A-Z]/.test(regPassword)) strength += 1;
+    if (/[A-Z]/.test(formData.password)) strength += 1;
     else feedback.push("Add uppercase letters");
     
-    if (/[a-z]/.test(regPassword)) strength += 1;
+    if (/[a-z]/.test(formData.password)) strength += 1;
     else feedback.push("Add lowercase letters");
     
-    if (/[0-9]/.test(regPassword)) strength += 1;
+    if (/[0-9]/.test(formData.password)) strength += 1;
     else feedback.push("Add numbers");
     
-    if (/[^A-Za-z0-9]/.test(regPassword)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(formData.password)) strength += 1;
     else feedback.push("Add special characters");
     
-    setPasswordStrength(strength);
-    setPasswordFeedback(feedback.join(", "));
-  }, [regPassword]);
-  
+    setPasswordStrength({ score: strength, feedback });
+  }, [formData.password]);
+
   const getPasswordStrengthColor = () => {
-    if (passwordStrength <= 1) return "bg-red-500";
-    if (passwordStrength <= 3) return "bg-yellow-500";
+    if (passwordStrength.score <= 1) return "bg-red-500";
+    if (passwordStrength.score <= 3) return "bg-yellow-500";
     return "bg-green-500";
   };
   
@@ -89,13 +105,17 @@ export default function LoginPage() {
     if (email === validUser.email && password === validUser.password) {
       // Set authentication cookie
       Cookies.set('auth', 'true', { 
-        expires: 1,
+        expires: 7, // 1 week
         secure: true,
-        sameSite: 'strict'
+        sameSite: 'strict',
+        path: '/'
       });
       
-      router.push("/");
-      router.refresh();
+      setSuccessMessage("Login successful! Redirecting...");
+      setTimeout(() => {
+        router.push("/");
+        router.refresh();
+      }, 1000);
     } else {
       setError("Invalid email or password. Please try again.");
       setIsLoading(false);
@@ -111,11 +131,7 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     if (resetEmail) {
-      if (resetEmail.toLowerCase() === validUser.email.toLowerCase()) {
-        setSuccessMessage(`Password recovery instructions sent to ${resetEmail}.`);
-      } else {
-        setSuccessMessage(`If an account exists for ${resetEmail}, we've sent password reset instructions.`);
-      }
+      setSuccessMessage(`Password reset instructions sent to ${resetEmail}. Check your inbox.`);
       
       setIsLoading(false);
       
@@ -136,22 +152,22 @@ export default function LoginPage() {
     setError("");
     
     // Validate form
-    if (!regTerms) {
+    if (!formData.terms) {
       setError("You must agree to the Terms of Service and Privacy Policy");
       setIsLoading(false);
       return;
     }
     
     // Validate password match
-    if (regPassword !== regConfirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match.");
       setIsLoading(false);
       return;
     }
     
     // Check password strength
-    if (passwordStrength < 3) {
-      setError("Please create a stronger password: " + passwordFeedback);
+    if (passwordStrength.score < 3) {
+      setError("Please create a stronger password: " + passwordStrength.feedback.join(", "));
       setIsLoading(false);
       return;
     }
@@ -160,110 +176,103 @@ export default function LoginPage() {
     await new Promise(resolve => setTimeout(resolve, 1200));
     
     // Success - would normally create account here
-    setSuccessMessage("Your account has been created successfully! You can now log in.");
+    setSuccessMessage("Account created successfully! Redirecting to login...");
     setIsLoading(false);
     
     // Return to login form after 3 seconds
     setTimeout(() => {
       setSuccessMessage("");
       setIsRegisterMode(false);
-      setEmail(regEmail); // Pre-fill email for convenience
+      setEmail(formData.email); // Pre-fill email for convenience
+      setFormData({
+        name: "",
+        email: "",
+        company: "",
+        role: "HR Manager",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+        terms: false,
+        marketing: false
+      });
     }, 3000);
   };
-  
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
   const renderLoginForm = () => (
     <form onSubmit={handleLogin} className="space-y-6">
       <div>
-        <label className="block text-gray-700 font-medium mb-2" htmlFor="email">
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">
           Email Address
         </label>
-        <div className="relative">
+        <div className="relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-            </svg>
+            <FaEnvelope className="h-5 w-5 text-gray-400" />
           </div>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="you@example.com"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            placeholder="your@company.com"
             required
+            autoComplete="username"
           />
         </div>
       </div>
       
       <div>
-        <label className="block text-gray-700 font-medium mb-2" htmlFor="password">
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">
           Password
         </label>
-        <div className="relative">
+        <div className="relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
+            <FaLock className="h-5 w-5 text-gray-400" />
           </div>
           <input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="••••••••"
             required
+            autoComplete="current-password"
           />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? (
+              <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+            ) : (
+              <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+            )}
+          </button>
         </div>
       </div>
       
-      <div className="flex items-center">
-        <input
-          id="remember-me"
-          name="remember-me"
-          type="checkbox"
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-        />
-        <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-          Remember me
-        </label>
-      </div>
-      
-      <button
-        type="submit"
-        disabled={isLoading}
-        className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
-          isLoading ? "opacity-80 cursor-not-allowed" : ""
-        }`}
-      >
-        {isLoading ? (
-          <>
-            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Signing in...
-          </>
-        ) : (
-          "Sign in"
-        )}
-      </button>
-      
-      <div className="flex flex-col space-y-4 text-center mt-4">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{" "}
-          <button 
-            type="button"
-            onClick={() => {
-              setIsRegisterMode(true);
-              setIsResetMode(false);
-            }}
-            className="font-medium text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            Create account
-          </button>
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          <input
+            id="remember-me"
+            name="remember-me"
+            type="checkbox"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+            Remember me
+          </label>
+        </div>
         
         <button
           type="button"
@@ -272,10 +281,48 @@ export default function LoginPage() {
             setIsRegisterMode(false);
             setResetEmail(email);
           }}
-          className="text-sm text-blue-600 hover:text-blue-800 transition-colors font-medium"
+          className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors"
         >
-          Forgot your password?
+          Forgot password?
         </button>
+      </div>
+      
+      <div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
+            isLoading ? "opacity-80 cursor-not-allowed" : ""
+          }`}
+        >
+          {isLoading ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Signing in...
+            </>
+          ) : (
+            "Sign in"
+          )}
+        </button>
+      </div>
+      
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Don't have an account?{" "}
+          <button 
+            type="button"
+            onClick={() => {
+              setIsRegisterMode(true);
+              setIsResetMode(false);
+            }}
+            className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+          >
+            Get started
+          </button>
+        </p>
       </div>
     </form>
   );
@@ -283,36 +330,33 @@ export default function LoginPage() {
   const renderResetForm = () => (
     <form onSubmit={handleForgotPassword} className="space-y-6">
       <div>
-        <label className="block text-gray-700 font-medium mb-2" htmlFor="reset-email">
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reset-email">
           Email Address
         </label>
-        <div className="relative">
+        <div className="relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-              <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-            </svg>
+            <FaEnvelope className="h-5 w-5 text-gray-400" />
           </div>
           <input
             id="reset-email"
             type="email"
             value={resetEmail}
             onChange={(e) => setResetEmail(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="you@example.com"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            placeholder="your@company.com"
             required
           />
         </div>
         <p className="mt-2 text-sm text-gray-500">
-          Enter the email address associated with your account, and we'll send you instructions to reset your password.
+          We'll send you a link to reset your password.
         </p>
       </div>
       
-      <div className="flex space-x-4">
+      <div className="flex space-x-3">
         <button
           type="button"
           onClick={() => setIsResetMode(false)}
-          className="w-1/2 py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+          className="w-1/2 py-3 px-4 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
         >
           Back to Login
         </button>
@@ -320,7 +364,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-1/2 flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
+          className={`w-1/2 flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
             isLoading ? "opacity-80 cursor-not-allowed" : ""
           }`}
         >
@@ -344,21 +388,20 @@ export default function LoginPage() {
     <form onSubmit={handleRegister} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-name">
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-name">
             Full Name <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
+          <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
+              <FaUser className="h-5 w-5 text-gray-400" />
             </div>
             <input
               id="reg-name"
+              name="name"
               type="text"
-              value={regName}
-              onChange={(e) => setRegName(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="John Doe"
               required
             />
@@ -366,23 +409,21 @@ export default function LoginPage() {
         </div>
         
         <div>
-          <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-email">
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-email">
             Email Address <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
+          <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-              </svg>
+              <FaEnvelope className="h-5 w-5 text-gray-400" />
             </div>
             <input
               id="reg-email"
+              name="email"
               type="email"
-              value={regEmail}
-              onChange={(e) => setRegEmail(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="you@example.com"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="your@company.com"
               required
             />
           </div>
@@ -391,178 +432,204 @@ export default function LoginPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-company">
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-company">
             Company Name
           </label>
-          <div className="relative">
+          <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4zm3 1h2v2H7V5zm2 3H7v2h2V8zm2-3h2v2h-2V5zm2 3h-2v2h2V8z" clipRule="evenodd" />
-              </svg>
+              <FaBuilding className="h-5 w-5 text-gray-400" />
             </div>
             <input
               id="reg-company"
+              name="company"
               type="text"
-              value={regCompany}
-              onChange={(e) => setRegCompany(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="Acme Inc."
+              value={formData.company}
+              onChange={handleInputChange}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Your Company Inc."
             />
           </div>
         </div>
         
         <div>
-          <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-role">
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-role">
             Job Title
           </label>
-          <div className="relative">
+          <div className="relative rounded-md shadow-sm">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
-                <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
-              </svg>
+              <FaBriefcase className="h-5 w-5 text-gray-400" />
             </div>
-            <input
+            <select
               id="reg-role"
-              type="text"
-              value={regRole}
-              onChange={(e) => setRegRole(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="HR Manager"
-            />
+              name="role"
+              value={formData.role}
+              onChange={handleInputChange}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none bg-white"
+            >
+              {roles.map(role => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </select>
           </div>
         </div>
       </div>
       
       <div>
-        <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-phone">
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-phone">
           Phone Number
         </label>
-        <div className="relative">
+        <div className="relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-            </svg>
+            <FaPhone className="h-5 w-5 text-gray-400" />
           </div>
           <input
             id="reg-phone"
+            name="phone"
             type="tel"
-            value={regPhone}
-            onChange={(e) => setRegPhone(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            value={formData.phone}
+            onChange={handleInputChange}
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
             placeholder="(123) 456-7890"
           />
         </div>
       </div>
       
-      <div>
-        <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-password">
-          Password <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-password">
+            Password <span className="text-red-500">*</span>
+          </label>
+          <div className="relative rounded-md shadow-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaLock className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="reg-password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleInputChange}
+              className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="••••••••"
+              required
+              minLength={8}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <FaEyeSlash className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+              ) : (
+                <FaEye className="h-5 w-5 text-gray-400 hover:text-gray-500" />
+              )}
+            </button>
           </div>
-          <input
-            id="reg-password"
-            type="password"
-            value={regPassword}
-            onChange={(e) => setRegPassword(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="••••••••"
-            required
-            minLength={8}
-          />
+          
+          {/* Password strength indicator */}
+          {formData.password && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs font-medium text-gray-500">
+                  Password strength: 
+                  <span className={`ml-1 ${
+                    passwordStrength.score <= 1 ? 'text-red-500' : 
+                    passwordStrength.score <= 3 ? 'text-yellow-500' : 'text-green-500'
+                  }`}>
+                    {passwordStrength.score <= 1 ? "Weak" : passwordStrength.score <= 3 ? "Medium" : "Strong"}
+                  </span>
+                </span>
+                {passwordStrength.score === 5 && (
+                  <span className="text-xs text-green-500 flex items-center">
+                    <FaCheck className="mr-1" /> Strong
+                  </span>
+                )}
+              </div>
+              <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full ${getPasswordStrengthColor()} transition-all duration-300`} 
+                  style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                ></div>
+              </div>
+              {passwordStrength.feedback.length > 0 && (
+                <p className="mt-1 text-xs text-gray-500">
+                  {passwordStrength.feedback.join(", ")}
+                </p>
+              )}
+            </div>
+          )}
         </div>
         
-        {/* Password strength indicator */}
-        {regPassword && (
-          <div className="mt-2">
-            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div 
-                className={`h-full ${getPasswordStrengthColor()}`} 
-                style={{ width: `${(passwordStrength / 5) * 100}%` }}
-              ></div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="reg-confirm-password">
+            Confirm Password <span className="text-red-500">*</span>
+          </label>
+          <div className="relative rounded-md shadow-sm">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaLock className="h-5 w-5 text-gray-400" />
             </div>
-            <p className="mt-1 text-xs text-gray-500 flex justify-between">
-              <span>Password strength: {passwordStrength <= 1 ? "Weak" : passwordStrength <= 3 ? "Medium" : "Strong"}</span>
-              {passwordFeedback && <span>{passwordFeedback}</span>}
-            </p>
+            <input
+              id="reg-confirm-password"
+              name="confirmPassword"
+              type={showPassword ? "text" : "password"}
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="••••••••"
+              required
+            />
           </div>
-        )}
-      </div>
-      
-      <div>
-        <label className="block text-gray-700 font-medium mb-2" htmlFor="reg-confirm-password">
-          Confirm Password <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <input
-            id="reg-confirm-password"
-            type="password"
-            value={regConfirmPassword}
-            onChange={(e) => setRegConfirmPassword(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            placeholder="••••••••"
-            required
-          />
+          {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+            <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
+          )}
         </div>
-        {regConfirmPassword && regPassword !== regConfirmPassword && (
-          <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
-        )}
       </div>
       
       <div className="space-y-3 mt-4">
         <div className="flex items-start">
           <input
             id="reg-terms"
-            name="reg-terms"
+            name="terms"
             type="checkbox"
-            checked={regTerms}
-            onChange={(e) => setRegTerms(e.target.checked)}
+            checked={formData.terms}
+            onChange={handleInputChange}
             className="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             required
           />
           <label htmlFor="reg-terms" className="ml-2 block text-sm text-gray-700">
-            I agree to the <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a> <span className="text-red-500">*</span>
+            I agree to the <a href="#" className="text-blue-600 hover:underline font-medium">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline font-medium">Privacy Policy</a> <span className="text-red-500">*</span>
           </label>
         </div>
         
         <div className="flex items-start">
           <input
             id="reg-marketing"
-            name="reg-marketing"
+            name="marketing"
             type="checkbox"
-            checked={regMarketing}
-            onChange={(e) => setRegMarketing(e.target.checked)}
+            checked={formData.marketing}
+            onChange={handleInputChange}
             className="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <label htmlFor="reg-marketing" className="ml-2 block text-sm text-gray-700">
-            I'd like to receive updates about products, features, and promotional offers from AlignHR
+            I'd like to receive updates about AlignHR products and services
           </label>
         </div>
       </div>
       
-      <div className="flex space-x-4 mt-6">
+      <div className="flex space-x-3 mt-6">
         <button
           type="button"
           onClick={() => setIsRegisterMode(false)}
-          className="w-1/3 py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+          className="w-1/3 py-3 px-4 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
         >
-          Back to Login
+          Back
         </button>
         
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-2/3 flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
+          className={`w-2/3 flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all ${
             isLoading ? "opacity-80 cursor-not-allowed" : ""
           }`}
         >
@@ -573,7 +640,7 @@ export default function LoginPage() {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Creating Account...
-              </>
+            </>
           ) : (
             "Create Account"
           )}
@@ -583,22 +650,31 @@ export default function LoginPage() {
   );
   
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
+      {/* Left side - Form */}
       <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto w-full max-w-md">
           <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+              </div>
+            </div>
             <h2 className="text-3xl font-extrabold text-gray-900">
-              {isResetMode ? "Reset Your Password" : isRegisterMode ? "Create Your Account" : "Sign in to AlignHR"}
+              {isResetMode ? "Reset Password" : isRegisterMode ? "Create Account" : "Welcome Back"}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
               {isResetMode 
-                ? "Enter your email to receive password reset instructions" 
+                ? "Enter your email to receive reset instructions" 
                 : isRegisterMode 
-                  ? "Fill in your details to create your account" 
-                  : "The HR platform that aligns with your business needs"}
+                  ? "Join thousands of HR professionals using AlignHR" 
+                  : "Sign in to your AlignHR account"}
             </p>
           </div>
           
+          {/* Alerts */}
           {error && (
             <div className="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
               <div className="flex">
@@ -629,7 +705,8 @@ export default function LoginPage() {
             </div>
           )}
           
-          <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+          {/* Form Container */}
+          <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10 border border-gray-100">
             {isResetMode 
               ? renderResetForm() 
               : isRegisterMode 
@@ -639,19 +716,68 @@ export default function LoginPage() {
         </div>
       </div>
       
+      {/* Right side - Hero */}
       <div className="hidden lg:block relative w-0 flex-1">
-        <div className="absolute inset-0 bg-blue-600">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-900 opacity-90"></div>
-          <div className="flex flex-col justify-center h-full px-10 relative z-10">
-            <div className="text-center text-white">
-              <h1 className="text-4xl font-bold mb-6">Welcome to AlignHR</h1>
-              <p className="text-xl mb-8">Your complete HR solution for managing teams and businesses efficiently.</p>
-              <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl mb-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-800 to-blue-900">
+          <div className="flex flex-col justify-center h-full px-20">
+            <div className="text-white">
+              <h1 className="text-4xl font-bold mb-6">AlignHR Platform</h1>
+              <p className="text-xl mb-8 max-w-lg">
+                The complete HR solution for modern businesses. Streamline your HR processes and focus on what matters most - your people.
+              </p>
+              
+              <div className="space-y-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-500">
+                      <FaCheck className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-lg font-medium">Employee Management</p>
+                    <p className="text-blue-200">Centralize all employee records and data</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-500">
+                      <FaCheck className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-lg font-medium">Payroll Processing</p>
+                    <p className="text-blue-200">Automate and simplify your payroll</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="flex items-center justify-center h-6 w-6 rounded-full bg-blue-500">
+                      <FaCheck className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-lg font-medium">Performance Tracking</p>
+                    <p className="text-blue-200">Monitor and improve employee performance</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-12 bg-white/10 backdrop-blur-sm p-6 rounded-xl">
                 <blockquote className="italic text-lg">
-                  "AlignHR has transformed how we manage our team. It's the perfect platform for modern HR operations."
+                  "AlignHR transformed our HR operations. We've reduced administrative work by 60% and improved employee satisfaction."
                 </blockquote>
-                <div className="mt-4 font-medium text-blue-200">
-                  Jane Smith, HR Director at TechCorp
+                <div className="mt-4 flex items-center">
+                  <div className="flex-shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-blue-400 flex items-center justify-center">
+                      <span className="text-white font-medium">JD</span>
+                    </div>
+                  </div>
+                  <div className="ml-3">
+                    <p className="font-medium text-blue-100">Jane Doe</p>
+                    <p className="text-sm text-blue-200">HR Director, TechCorp</p>
+                  </div>
                 </div>
               </div>
             </div>

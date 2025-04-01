@@ -15,7 +15,7 @@ const Payroll = () => {
   const [isDetailView, setIsDetailView] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-  // Extended departments
+  // Extended departments with AlignHR branding
   const departments = [
     "Engineering",
     "Marketing",
@@ -31,7 +31,17 @@ const Payroll = () => {
     "Design"
   ];
 
-  // Generate 100 dummy employees
+  // Format salary as KES
+  const formatSalary = (amount) => {
+    return new Intl.NumberFormat('en-KE', {
+      style: 'currency',
+      currency: 'KES',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Generate 100 dummy employees with AlignHR branding
   const generateDummyData = () => {
     const firstNames = [
       "John", "Sarah", "Michael", "Emily", "Robert", "Jessica", "David", "Jennifer", 
@@ -78,7 +88,7 @@ const Payroll = () => {
       const salaryRange = salarySpreads[dept];
       const salary = Math.floor(
         Math.random() * (salaryRange[1] - salaryRange[0]) + salaryRange[0]
-      ).toString();
+      );
       
       employees.push({
         id: i,
@@ -102,7 +112,7 @@ const Payroll = () => {
       const newEmployee = {
         id: payrollList.length + 1,
         name: employeeName,
-        salary,
+        salary: parseInt(salary),
         department,
       };
       setPayrollList([...payrollList, newEmployee]);
@@ -124,7 +134,7 @@ const Payroll = () => {
   const handleEditEmployee = (employee) => {
     setEditingId(employee.id);
     setEmployeeName(employee.name);
-    setSalary(employee.salary);
+    setSalary(employee.salary.toString());
     setDepartment(employee.department);
     setIsDetailView(false);
   };
@@ -137,7 +147,7 @@ const Payroll = () => {
           ? {
               ...employee,
               name: employeeName,
-              salary,
+              salary: parseInt(salary),
               department,
             }
           : employee
@@ -167,15 +177,18 @@ const Payroll = () => {
     if (sortBy === "name") {
       return a.name.localeCompare(b.name);
     } else if (sortBy === "salary") {
-      return parseInt(a.salary) - parseInt(b.salary);
-    } else {
+      return a.salary - b.salary;
+    } else if (sortBy === "department") {
       return a.department.localeCompare(b.department);
+    } else if (sortBy === "department-desc") {
+      return b.department.localeCompare(a.department);
     }
+    return 0;
   });
 
   // Calculate total payroll
   const totalPayroll = payrollList.reduce(
-    (sum, employee) => sum + parseInt(employee.salary),
+    (sum, employee) => sum + employee.salary,
     0
   );
 
@@ -187,11 +200,17 @@ const Payroll = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-3 sm:p-6 bg-white rounded-lg shadow-lg">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-blue-700">
-        Payroll Management
-      </h1>
+      <div className="flex items-center justify-center mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-center text-blue-700 mr-2">
+          AlignHR Payroll
+        </h1>
+        <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+          v2.0
+        </span>
+      </div>
 
-      <div className="bg-blue-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6">
+      <div className="bg-blue-50 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 border border-blue-200">
+        <h2 className="text-lg font-semibold text-blue-800 mb-3">Employee Compensation Management</h2>
         <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-4">
           <div className="w-full sm:flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -207,7 +226,7 @@ const Payroll = () => {
 
           <div className="w-full sm:flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Salary Amount
+              Salary Amount (KES)
             </label>
             <Input
               value={salary}
@@ -225,7 +244,7 @@ const Payroll = () => {
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md"
+              className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
             >
               {departments.map((dept) => (
                 <option key={dept} value={dept}>
@@ -240,15 +259,21 @@ const Payroll = () => {
           {editingId ? (
             <Button
               onClick={handleSaveEdit}
-              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white"
+              className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white flex items-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
               Save Changes
             </Button>
           ) : (
             <Button
               onClick={handleAddPayroll}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white flex items-center"
             >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+              </svg>
               Add Employee
             </Button>
           )}
@@ -256,13 +281,18 @@ const Payroll = () => {
       </div>
 
       {/* Search and Sort Section */}
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="w-full sm:w-1/3">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
+        <div className="w-full sm:w-1/2">
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search Employees"
+            placeholder="Search employees by name or department"
             className="w-full"
+            icon={
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
+            }
           />
         </div>
 
@@ -273,11 +303,12 @@ const Payroll = () => {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="name">Name</option>
-            <option value="salary">Salary</option>
-            <option value="department">Department</option>
+            <option value="name">Name (A-Z)</option>
+            <option value="salary">Salary (Low-High)</option>
+            <option value="department">Department (A-Z)</option>
+            <option value="department-desc">Department (Z-A)</option>
           </select>
         </div>
       </div>
@@ -285,39 +316,41 @@ const Payroll = () => {
       {/* Payroll Table */}
       <div className="overflow-x-auto">
         <table className="w-full table-auto border-collapse border border-gray-300 text-sm">
-          <thead>
+          <thead className="bg-gray-100">
             <tr>
-              <th className="p-2 text-left border border-gray-300">Name</th>
-              <th className="p-2 text-left border border-gray-300">Salary</th>
-              <th className="p-2 text-left border border-gray-300">Department</th>
-              <th className="p-2 text-left border border-gray-300">Actions</th>
+              <th className="p-3 text-left border border-gray-300">Employee</th>
+              <th className="p-3 text-left border border-gray-300">Salary</th>
+              <th className="p-3 text-left border border-gray-300">Department</th>
+              <th className="p-3 text-left border border-gray-300">Actions</th>
             </tr>
           </thead>
           <tbody>
             {sortedEmployees.map((employee) => (
-              <tr key={employee.id}>
-                <td className="p-2 border border-gray-300">{employee.name}</td>
-                <td className="p-2 border border-gray-300">KES {employee.salary}</td>
-                <td className="p-2 border border-gray-300">{employee.department}</td>
-                <td className="p-2 border border-gray-300">
-                  <Button
-                    onClick={() => handleViewEmployee(employee)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-3 mr-2"
-                  >
-                    View
-                  </Button>
-                  <Button
-                    onClick={() => handleEditEmployee(employee)}
-                    className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs py-1 px-3 mr-2"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteEmployee(employee.id)}
-                    className="bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-3"
-                  >
-                    Delete
-                  </Button>
+              <tr key={employee.id} className="hover:bg-gray-50">
+                <td className="p-3 border border-gray-300">{employee.name}</td>
+                <td className="p-3 border border-gray-300">{formatSalary(employee.salary)}</td>
+                <td className="p-3 border border-gray-300">{employee.department}</td>
+                <td className="p-3 border border-gray-300">
+                  <div className="flex flex-wrap gap-1">
+                    <Button
+                      onClick={() => handleViewEmployee(employee)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs py-1 px-2"
+                    >
+                      View
+                    </Button>
+                    <Button
+                      onClick={() => handleEditEmployee(employee)}
+                      className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs py-1 px-2"
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      onClick={() => handleDeleteEmployee(employee.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white text-xs py-1 px-2"
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -325,28 +358,58 @@ const Payroll = () => {
         </table>
       </div>
 
-      <div className="mt-4 text-lg font-bold text-right">
-        Total Payroll: ${totalPayroll.toLocaleString()}
+      <div className="mt-4 text-lg font-bold text-right bg-blue-50 p-3 rounded-lg">
+        Total Monthly Payroll: <span className="text-blue-700">{formatSalary(totalPayroll)}</span>
       </div>
 
       {/* Employee Details View */}
       {isDetailView && selectedEmployee && (
-        <div className="mt-6 p-4 border border-gray-300 bg-blue-100 rounded-md">
-          <h3 className="text-xl font-semibold mb-3">
-            Employee Details: {selectedEmployee.name}
-          </h3>
-          <div>
-            <strong>Salary:</strong> ${selectedEmployee.salary}
+        <div className="mt-6 p-4 border border-gray-300 bg-blue-50 rounded-md shadow-sm">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="text-xl font-semibold text-blue-800">
+              Employee Compensation Details
+            </h3>
+            <button 
+              onClick={handleBackToList}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
           </div>
-          <div>
-            <strong>Department:</strong> {selectedEmployee.department}
+          <div className="space-y-2">
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium">Employee:</span>
+              <span>{selectedEmployee.name}</span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium">Monthly Salary:</span>
+              <span className="font-semibold">{formatSalary(selectedEmployee.salary)}</span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium">Department:</span>
+              <span>{selectedEmployee.department}</span>
+            </div>
+            <div className="flex justify-between border-b pb-2">
+              <span className="font-medium">Annual Salary:</span>
+              <span className="font-semibold">{formatSalary(selectedEmployee.salary * 12)}</span>
+            </div>
           </div>
-          <Button
-            onClick={handleBackToList}
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Back to List
-          </Button>
+          <div className="flex justify-end mt-4 space-x-2">
+            <Button
+              onClick={() => handleEditEmployee(selectedEmployee)}
+              className="bg-yellow-600 hover:bg-yellow-700 text-white"
+            >
+              Edit Compensation
+            </Button>
+            <Button
+              onClick={handleBackToList}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Back to List
+            </Button>
+          </div>
         </div>
       )}
     </div>
