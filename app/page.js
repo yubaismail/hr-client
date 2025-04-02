@@ -38,10 +38,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-100 to-indigo-200 p-6 md:p-10 rounded-xl shadow-md border border-blue-300 text-center md:text-left">
         <div className="flex items-center justify-center md:justify-start mb-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-blue-900 mr-3">AlignHR</h1>
-          <span className="bg-blue-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">
-            v2.0
-          </span>
+          <h1 className="text-3xl md:text-4xl font-bold text-blue-900">AlignHR</h1>
         </div>
         <h2 className="text-2xl md:text-3xl font-bold text-blue-800 mb-2">{greeting}</h2>
         <p className="text-gray-700 max-w-3xl text-lg mx-auto md:mx-0">

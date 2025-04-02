@@ -38,9 +38,6 @@ export default function RootLayout({ children }) {
               {/* Logo with branding */}
               <div className="flex items-center">
                 <h1 className="text-2xl md:text-3xl font-bold tracking-wide">AlignHR</h1>
-                <span className="ml-2 bg-white text-blue-600 text-xs font-semibold px-2 py-0.5 rounded-full hidden md:inline-block">
-                  v2.0
-                </span>
               </div>
               
               {/* Menu Toggle Button (Mobile) */}
